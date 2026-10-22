@@ -200,13 +200,17 @@ class GeminiApp:
             results = ["=== 🧪 SYSTEM DIAGNOSTIC REPORT ==="]
             stt_mode = getattr(config, "STT_ENGINE", "whisper")
             if stt_mode == "whisper" and getattr(self.engine, "whisper", None) and self.engine.whisper._is_available:
-                results.append(f"✅ STT Engine: Local Faster-Whisper ({config.WHISPER_MODEL_SIZE})")
+                results.append(
+                    f"✅ STT Engine: Local Faster-Whisper "
+                    f"(vi: {config.WHISPER_VI_MODEL} · other: {config.WHISPER_MULTI_MODEL})"
+                )
             else:
                 results.append(f"ℹ️ STT Engine: Gemini API Fallback")
             return "\n".join(results)
 
         self.worker = AIWorker(test_task)
         self.worker.finished.connect(self.ui.set_result)
+        self.worker.error.connect(lambda err: self.ui.set_result(f"Diagnostics error: {err}"))
         self.worker.start()
 
     def cleanup(self):
